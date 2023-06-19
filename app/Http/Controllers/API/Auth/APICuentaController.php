@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Grupo;
 use App\Models\Role;
 use App\Models\User;
+use DateTimeZone;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Hash;
 
 class APICuentaController extends Controller
@@ -41,27 +43,56 @@ class APICuentaController extends Controller
             ], 400);
         }
 
+        $tokenExpirationDate = Carbon::now()->addMinutes(60);
+
         if($user->roles()->where('role_name', 'profesor')->exists()) {
+            $token = $user->createToken('token', ['profesor'], $tokenExpirationDate);
             return response()->json([
-                'token' => $user->createToken('token', ['profesor'])->plainTextToken,
+                'token' => $token->plainTextToken,
+                'expires_at' => $tokenExpirationDate->toIso8601String(),
                 'success' => true,
                 'message' => '¡Login Correcto!',
+                'helper_data' => [
+                    'user_id' => $user->id,
+                    'nombre' => $user->nombre,
+                    'apellido_paterno' => $user->apellido_paterno,
+                    'apellido_materno' => $user->apellido_materno,
+                    'roles' => $user->roles
+                ]
             ]);
         }
 
         if($user->roles()->where('role_name', 'alumno')->exists()) {
+            $token = $user->createToken('token', ['alumno'], $tokenExpirationDate);
             return response()->json([
-                'token' => $user->createToken('token', ['alumno'])->plainTextToken,
+                'token' => $token->plainTextToken,
+                'expires_at' => $tokenExpirationDate->toIso8601String(),
                 'success' => true,
                 'message' => '¡Login Correcto!',
+                'helper_data' => [
+                    'user_id' => $user->id,
+                    'nombre' => $user->nombre,
+                    'apellido_paterno' => $user->apellido_paterno,
+                    'apellido_materno' => $user->apellido_materno,
+                    'roles' => $user->roles
+                ]
             ]);
         }
 
         if($user->roles()->where('role_name', 'administrador')->exists()) {
+            $token = $user->createToken('token', ['administrador'], $tokenExpirationDate);
             return response()->json([
-                'token' => $user->createToken('token', ['administrador'])->plainTextToken,
+                'token' => $token->plainTextToken,
+                'expires_at' => $tokenExpirationDate->toIso8601String(),
                 'success' => true,
                 'message' => '¡Login Correcto!',
+                'helper_data' => [
+                    'user_id' => $user->id,
+                    'nombre' => $user->nombre,
+                    'apellido_paterno' => $user->apellido_paterno,
+                    'apellido_materno' => $user->apellido_materno,
+                    'roles' => $user->roles
+                ]
             ]);
         }
 

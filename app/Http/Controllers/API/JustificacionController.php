@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NuevaJustificacionRecibida;
+use App\Models\Grupo;
 use App\Models\Justificacion;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
@@ -52,6 +55,25 @@ class JustificacionController extends Controller
 
         $token = $request->bearerToken();
 		$authUser = PersonalAccessToken::findToken($token)->tokenable;
+        $profesorId = $request->profesor_id;
+
+        $profesor = User::whereHas('roles', function ($query) use($profesorId) {
+            $query->where([
+                ['role_name', 'profesor'],
+                ['users.id', $profesorId]
+            ]);
+        })->first();
+
+        if(!$profesor) {
+            abort(404);
+        }
+
+        $grupoAlumnoActual = Grupo::whereHas('users', function ($query) use($authUser) {
+            $query->where([
+                ['users.id', $authUser->id],
+                ['grupo_user.is_active', true]
+            ]);
+        })->first();
 
         $justificacion = new Justificacion();
         $justificacion->fill($request->only([
@@ -65,6 +87,14 @@ class JustificacionController extends Controller
         $justificacion->alumno_id = $authUser->id;
 
         if($justificacion->save()) {
+            $mailData = [];
+            $mailData['profesor'] = $profesor;
+            $mailData['alumno'] = $authUser;
+            $mailData['justificacion'] = $justificacion;
+            $mailData['grupo'] = $grupoAlumnoActual;
+
+            Mail::to($profesor->email)->send(new NuevaJustificacionRecibida($mailData));
+
             return response()->json([
                 'success' => true,
                 'message' => '!Justificacion Creado!'

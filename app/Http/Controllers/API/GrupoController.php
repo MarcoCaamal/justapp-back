@@ -12,7 +12,7 @@ class GrupoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function indexWithUsers(Request $request)
     {
         $token = $request->bearerToken();
 		$authUser = PersonalAccessToken::findToken($token)->tokenable;
@@ -45,6 +45,10 @@ class GrupoController extends Controller
         }
 
         return $sql->with(['users.roles'])->get();
+    }
+
+    public function indexWithoutAuth() {
+        return Grupo::all();
     }
 
     /**

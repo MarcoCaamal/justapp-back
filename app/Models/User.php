@@ -52,7 +52,7 @@ class User extends Authenticatable
 
     public function grupos()
     {
-        return $this->belongsToMany(Grupo::class, 'grupo_user', 'user_id', 'grupo_id');
+        return $this->belongsToMany(Grupo::class, 'grupo_user', 'user_id', 'grupo_id')->withTimestamps()->withPivot(['is_active']);
     }
 
     public function roles()
