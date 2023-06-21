@@ -23,19 +23,18 @@ class DatabaseSeeder extends Seeder
         // ]);
 
         Role::upsert([
-            ['role_name' => 'profesor'],
             ['role_name' => 'alumno'],
-            ['role_name' => 'administrador'],
+            ['role_name' => 'orientador'],
         ], ['id']);
 
         $admin = new User();
-        $admin->nombre = 'admin';
+        $admin->nombre = 'orientador';
         $admin->apellido_paterno = '';
         $admin->apellido_materno = '';
-        $admin->email = 'admin@admin.com';
+        $admin->email = 'orientador@app-justificaciones.com';
         $admin->password = Hash::make('password');
         $admin->save();
 
-        $admin->roles()->attach(3, ['is_active' => true]);
+        $admin->roles()->attach(2, ['is_active' => true]);
     }
 }

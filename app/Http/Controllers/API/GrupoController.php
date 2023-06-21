@@ -19,19 +19,6 @@ class GrupoController extends Controller
         $sql = Grupo::query();
 
         if (
-            $authUser->roles()->where('role_name', 'profesor')->exists()
-        ) {
-            $sql->with([
-                'users' => function($query) {
-                    $query->whereHas('roles', function ($query) {
-                        $query->where('role_name', 'alumno');
-                    });
-                }
-            ]);
-            return $sql->get();
-        }
-
-        if (
             $authUser->roles()->where('role_name', 'alumno')->exists()
         ) {
             $sql->with([

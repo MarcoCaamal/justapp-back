@@ -22,6 +22,7 @@ class Justificacion extends Model
         'fecha_inicio',
         'fecha_fin',
         'motivo',
+        'email_docente'
     ];
 
     public function alumno()

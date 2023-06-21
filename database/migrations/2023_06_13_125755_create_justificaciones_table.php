@@ -17,7 +17,7 @@ return new class extends Migration
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
             $table->text('motivo');
-            $table->foreignId('profesor_id')->nullable()->constrained('users')->onDelete('set null')->onUpdate('cascade');
+            $table->string('email_docente');
             $table->foreignId('alumno_id')->nullable()->constrained('users')->onDelete('set null')->onUpdate('cascade');
             $table->timestamps();
         });
