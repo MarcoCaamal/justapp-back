@@ -48,12 +48,12 @@ class APICuentaController extends Controller
         if($user->roles()->where('role_name', 'alumno')->exists()) {
             $token = $user->createToken('token', ['alumno'], $tokenExpirationDate);
             return response()->json([
-                'token' => $token->plainTextToken,
-                'expires_at' => $tokenExpirationDate->toIso8601String(),
                 'success' => true,
                 'message' => '¡Login Correcto!',
                 'helper_data' => [
                     'user_id' => $user->id,
+                    'token' => $token->plainTextToken,
+                    'expires_at' => $tokenExpirationDate->toIso8601String(),
                     'nombre' => $user->nombre,
                     'apellido_paterno' => $user->apellido_paterno,
                     'apellido_materno' => $user->apellido_materno,
@@ -65,12 +65,12 @@ class APICuentaController extends Controller
         if($user->roles()->where('role_name', 'orientador')->exists()) {
             $token = $user->createToken('token', ['orientador'], $tokenExpirationDate);
             return response()->json([
-                'token' => $token->plainTextToken,
-                'expires_at' => $tokenExpirationDate->toIso8601String(),
                 'success' => true,
                 'message' => '¡Login Correcto!',
                 'helper_data' => [
                     'user_id' => $user->id,
+                    'token' => $token->plainTextToken,
+                    'expires_at' => $tokenExpirationDate->toIso8601String(),
                     'nombre' => $user->nombre,
                     'apellido_paterno' => $user->apellido_paterno,
                     'apellido_materno' => $user->apellido_materno,
