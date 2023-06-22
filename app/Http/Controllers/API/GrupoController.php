@@ -14,9 +14,19 @@ class GrupoController extends Controller
      */
     public function indexWithUsers(Request $request)
     {
+        $request->validate([
+            'param' => ['nullable', 'string']
+        ]);
+
         $token = $request->bearerToken();
 		$authUser = PersonalAccessToken::findToken($token)->tokenable;
         $sql = Grupo::query();
+        $param = $request->query('param');
+
+        if($param) {
+            $sql->where('nombre', $param)->orWhere('id', $param);
+        }
+
 
         if (
             $authUser->roles()->where('role_name', 'profesor')->exists()

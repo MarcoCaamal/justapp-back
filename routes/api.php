@@ -33,6 +33,28 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::put('/grupos/{id}', 'update');
             route::delete('/grupos/{id}', 'destroy');
         });
+
+        Route::get('/usuarios', function (Request $request) {
+            $request->validate([
+                'param' => ['nullable', 'string']
+            ]);
+            $sql = User::query();
+            $param = $request->query('param');
+
+            if($param) {
+                $sql->where('nombre', 'like', "%$param%")
+                    ->orWhere('apellido_materno', 'like', "%$param%")
+                    ->orWhere('apellido_paterno', 'like', "%$param%")
+                    ->orWhere('numero_control', 'like', "%$param%")
+                    ->orWhere('email', 'like', "%$param%");
+            }
+
+            $sql->whereHas('roles', function ($query) {
+                $query->where('role_name', '<>', 'administrador');
+            });
+
+            return $sql->with(['roles', 'grupos'])->get();
+        });
     });
 
     Route::middleware('abilities:alumno')->group(function () {

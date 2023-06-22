@@ -8,6 +8,7 @@ use App\Models\Grupo;
 use App\Models\Justificacion;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Mail;
 use Laravel\Sanctum\PersonalAccessToken;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
@@ -19,15 +20,48 @@ class JustificacionController extends Controller
      */
     public function index(Request $request)
     {
+        $request->validate([
+            'param' => ['nullable', 'string'],
+            'fecha_inicio' => ['nullable', 'date', 'date_format:Y-m-d'],
+            'fecha_fin' => ['nullable', 'date','date_format:Y-m-d'],
+        ]);
+
         $token = $request->bearerToken();
 		$authUser = PersonalAccessToken::findToken($token)->tokenable;
         $sql = Justificacion::query();
+        $param = $request->query('param');
+        $fechaInicio = $request->query('fecha_inicio');
+        $fechaFin = $request->query('fecha_fin');
+
+        if($param) {
+            $sql->where('identificador', 'like', "%$param%")->orWhere('id', $param);
+        }
+
+        if(($fechaInicio && !$fechaFin) || (!$fechaInicio && $fechaFin)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tienes erroes de validacion',
+                'helper_data' => [
+                    'errors' => ['La fecha de inicio o la fecha de fin es requerida.']
+                ]
+            ], 400);
+        }
+
+        $format = Carbon::now();
+
+        if($fechaInicio && $fechaFin) {
+            $sql->where([
+                ['fecha_inicio', '>=', $fechaInicio],
+                ['fecha_fin', '<=', $fechaFin]
+            ]);
+        }
 
         if (
             $authUser->roles()->where('role_name', 'profesor')->exists()
         ) {
             $sql->where('profesor_id', $authUser->id);
             $sql->with('alumno');
+            return $sql->get();
         }
 
         if (
@@ -35,9 +69,10 @@ class JustificacionController extends Controller
         ) {
             $sql->where('alumno_id', $authUser->id);
             $sql->with('profesor');
+            return $sql->get();
         }
 
-        return $sql->get();
+        return $sql->with(['profesor', 'alumno'])->get();
     }
 
     /**

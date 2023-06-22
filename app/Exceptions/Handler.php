@@ -39,7 +39,7 @@ class Handler extends ExceptionHandler
                 return response()->json([
                     'success' => false,
                     'messages' => 'There are validation errors',
-                    'errors' => $e->errors()
+                    'helper_data' => $e->errors()
                 ], 400);
             }
         });
@@ -91,7 +91,7 @@ class Handler extends ExceptionHandler
                     'success' => false,
                     'message' => 'Error interno en el servidor',
                     'statusCode' => 500
-                ]);
+                ], 500);
             }
         });
     }
