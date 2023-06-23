@@ -45,32 +45,15 @@ class APICuentaController extends Controller
 
         $tokenExpirationDate = Carbon::now()->addMinutes(60);
 
-        if($user->roles()->where('role_name', 'profesor')->exists()) {
-            $token = $user->createToken('token', ['profesor'], $tokenExpirationDate);
-            return response()->json([
-                'token' => $token->plainTextToken,
-                'expires_at' => $tokenExpirationDate->toIso8601String(),
-                'success' => true,
-                'message' => '¡Login Correcto!',
-                'helper_data' => [
-                    'user_id' => $user->id,
-                    'nombre' => $user->nombre,
-                    'apellido_paterno' => $user->apellido_paterno,
-                    'apellido_materno' => $user->apellido_materno,
-                    'roles' => $user->roles
-                ]
-            ]);
-        }
-
         if($user->roles()->where('role_name', 'alumno')->exists()) {
             $token = $user->createToken('token', ['alumno'], $tokenExpirationDate);
             return response()->json([
-                'token' => $token->plainTextToken,
-                'expires_at' => $tokenExpirationDate->toIso8601String(),
                 'success' => true,
                 'message' => '¡Login Correcto!',
                 'helper_data' => [
                     'user_id' => $user->id,
+                    'token' => $token->plainTextToken,
+                    'expires_at' => $tokenExpirationDate->toIso8601String(),
                     'nombre' => $user->nombre,
                     'apellido_paterno' => $user->apellido_paterno,
                     'apellido_materno' => $user->apellido_materno,
@@ -79,15 +62,15 @@ class APICuentaController extends Controller
             ]);
         }
 
-        if($user->roles()->where('role_name', 'administrador')->exists()) {
-            $token = $user->createToken('token', ['administrador'], $tokenExpirationDate);
+        if($user->roles()->where('role_name', 'orientador')->exists()) {
+            $token = $user->createToken('token', ['orientador'], $tokenExpirationDate);
             return response()->json([
-                'token' => $token->plainTextToken,
-                'expires_at' => $tokenExpirationDate->toIso8601String(),
                 'success' => true,
                 'message' => '¡Login Correcto!',
                 'helper_data' => [
                     'user_id' => $user->id,
+                    'token' => $token->plainTextToken,
+                    'expires_at' => $tokenExpirationDate->toIso8601String(),
                     'nombre' => $user->nombre,
                     'apellido_paterno' => $user->apellido_paterno,
                     'apellido_materno' => $user->apellido_materno,
@@ -99,47 +82,6 @@ class APICuentaController extends Controller
         return response()->json([
             'success' => false,
             'message' => '¡Login Incorrecto!'
-        ]);
-    }
-
-    public function registerProfesor(Request $request)
-    {
-        $request->validate([
-            'nombre' => ['required', 'string'],
-            'apellido_paterno' => ['required', 'string'],
-            'apellido_materno' => ['required', 'string'],
-            'email' => ['email', 'required'],
-            'password' => ['required', 'string'],
-            'grupos' => ['required', 'array'],
-            'grupos.*' => ['numeric', 'exists:grupos,id']
-        ]);
-
-        $profesor = new User();
-
-        $profesor->fill($request->only([
-            'nombre',
-            'apellido_paterno',
-            'apellido_materno',
-            'email',
-            'password',
-        ]));
-
-        if($profesor->save()) {
-            $roleProfesor = Role::where('role_name', 'profesor')->first();
-            $profesor->roles()->attach($roleProfesor->getKey(), ['is_active' => true]);
-            $profesor->grupos()->attach($request->grupos, ['is_active' => true]);
-
-            // TODO:Descomentar el envio de email
-            // event(new Registered($profesor));
-            return response()->json([
-                'success' => true,
-                'message' => '¡Profesor registrado!'
-            ]);
-        }
-
-        return response()->json([
-            'success' => false,
-            'message' => '¡Ha ocurrido un error! intentelo más tarde.'
         ]);
     }
 

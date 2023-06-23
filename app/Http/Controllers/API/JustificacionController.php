@@ -85,23 +85,11 @@ class JustificacionController extends Controller
             'fecha_inicio' => ['required', 'date', 'date_format:Y-m-d'],
             'fecha_fin' => ['required', 'date', 'date_format:Y-m-d'],
             'motivo' => ['required', 'string'],
-            'profesor_id' => ['required', 'numeric'],
+            'email_docente' => ['required', 'email'],
         ]);
 
         $token = $request->bearerToken();
 		$authUser = PersonalAccessToken::findToken($token)->tokenable;
-        $profesorId = $request->profesor_id;
-
-        $profesor = User::whereHas('roles', function ($query) use($profesorId) {
-            $query->where([
-                ['role_name', 'profesor'],
-                ['users.id', $profesorId]
-            ]);
-        })->first();
-
-        if(!$profesor) {
-            abort(404);
-        }
 
         $grupoAlumnoActual = Grupo::whereHas('users', function ($query) use($authUser) {
             $query->where([
@@ -116,6 +104,7 @@ class JustificacionController extends Controller
             'fecha_inicio',
             'fecha_fin',
             'motivo',
+            'email_docente'
         ]));
 
         $justificacion->profesor_id = $request->profesor_id;
@@ -123,12 +112,11 @@ class JustificacionController extends Controller
 
         if($justificacion->save()) {
             $mailData = [];
-            $mailData['profesor'] = $profesor;
             $mailData['alumno'] = $authUser;
             $mailData['justificacion'] = $justificacion;
             $mailData['grupo'] = $grupoAlumnoActual;
 
-            Mail::to($profesor->email)->send(new NuevaJustificacionRecibida($mailData));
+            Mail::to($request->email_docente)->send(new NuevaJustificacionRecibida($mailData));
 
             return response()->json([
                 'success' => true,

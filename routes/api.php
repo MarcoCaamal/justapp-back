@@ -21,13 +21,14 @@ use Laravel\Sanctum\PersonalAccessToken;
 */
 
 Route::post('/cuentas/login', [APICuentaController::class, 'login']);
-Route::post('/cuentas/register/profesor', [APICuentaController::class, 'registerProfesor']);
-Route::post('/cuentas/register/alumno', [APICuentaController::class, 'registerAlumno']);
+
 
 Route::get('/grupos', [GrupoController::class, 'indexWithoutAuth']);
 
 Route::middleware('auth:sanctum')->group(function () {
-    Route::middleware('abilities:administrador')->group(function () {
+    Route::middleware('abilities:orientador')->group(function () {
+        Route::post('/cuentas/register/alumno', [APICuentaController::class, 'registerAlumno']);
+
         Route::controller(GrupoController::class)->group(function () {
             Route::post('/grupos', 'store');
             Route::put('/grupos/{id}', 'update');
@@ -58,28 +59,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 
     Route::middleware('abilities:alumno')->group(function () {
-        Route::get('/usuarios/profesores-alumno', function(Request $request) {
-            $token = $request->bearerToken();
-            $authUser = PersonalAccessToken::findToken($token)->tokenable;
-            $sql = User::query();
-
-            $grupoAlumnoActual = Grupo::whereHas('users', function ($query) use($authUser) {
-                $query->where([
-                    ['users.id', $authUser->id],
-                    ['grupo_user.is_active', true]
-                ]);
-            })->first();
-
-            $sql->whereHas('roles', function ($query) {
-                $query->where('role_name', 'profesor');
-            });
-
-            $sql->whereHas('grupos', function ($query) use ($grupoAlumnoActual) {
-                $query->where('grupos.id', $grupoAlumnoActual->id);
-            });
-
-            return $sql->get();
-        });
 
         Route::controller(JustificacionController::class)->group(function () {
             Route::post('/justificaciones', 'store');
