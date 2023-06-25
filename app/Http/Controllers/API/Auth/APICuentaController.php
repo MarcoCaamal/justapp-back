@@ -43,7 +43,8 @@ class APICuentaController extends Controller
             ], 400);
         }
 
-        $tokenExpirationDate = Carbon::now()->addMinutes(60);
+        $tokenExpirationDate = Carbon::now();
+        $tokenExpirationDate->addMinutes(60);
 
         if($user->roles()->where('role_name', 'profesor')->exists()) {
             $token = $user->createToken('token', ['profesor'], $tokenExpirationDate);

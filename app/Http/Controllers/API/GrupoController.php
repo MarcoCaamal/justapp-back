@@ -24,7 +24,7 @@ class GrupoController extends Controller
         $param = $request->query('param');
 
         if($param) {
-            $sql->where('nombre', $param)->orWhere('id', $param);
+            $sql->where('nombre', 'like', "%$param%")->orWhere('id', $param);
         }
 
 
