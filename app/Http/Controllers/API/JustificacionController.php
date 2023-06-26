@@ -72,7 +72,6 @@ class JustificacionController extends Controller
             'email_docente'
         ]));
 
-        $justificacion->profesor_id = $request->profesor_id;
         $justificacion->alumno_id = $authUser->id;
 
         if($justificacion->save()) {
